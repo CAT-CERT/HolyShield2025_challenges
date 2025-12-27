@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap
+Sitemap: http://localhost:3000/sitemap.xml
+
+# Admin panel (Internal use only)
+# /admin - Requires authentication
+

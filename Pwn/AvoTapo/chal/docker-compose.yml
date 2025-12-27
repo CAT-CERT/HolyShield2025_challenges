@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  chall:
+    build:
+      context: ./chall/
+      dockerfile: Dockerfile
+    container_name: chall
+    ports:
+      - "9000:9000"

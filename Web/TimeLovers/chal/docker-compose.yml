@@ -1,0 +1,27 @@
+#docker-compose build --no-cache / docker-compose up
+services:
+  db:
+    build:
+      context: initdb
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - holyshield25
+      
+  app:
+    ports: 
+      - 9000:9000
+    build: 
+      context: web
+      dockerfile: Dockerfile
+    container_name: TimeLovers
+    restart: always
+    depends_on:
+      - db
+
+    networks:
+      - holyshield25
+
+networks:
+  holyshield25:
+    driver: bridge

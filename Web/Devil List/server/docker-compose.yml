@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  external:
+    build: ./external
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - internal
+      - admin
+    container_name: DevilList_external
+    cpus: "0.5"
+    mem_limit: 250m
+
+  internal:
+    build: ./internal
+    expose:
+      - "8000"
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: devilList
+    depends_on:
+      - mysql
+    container_name: DevilList_internal
+    cpus: "0.5"
+    mem_limit: 250m
+
+  admin:
+    build: ./admin
+    expose:
+      - "6000"
+    restart: unless-stopped
+    container_name: DevilList_admin
+    cpus: "1"
+    mem_limit: 700m
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: devilList
+    restart: unless-stopped
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    expose:
+      - "3306"
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: DevilList_mysql
+    cpus: "1"
+    mem_limit: 500m
+
+volumes:
+  mysql_data:

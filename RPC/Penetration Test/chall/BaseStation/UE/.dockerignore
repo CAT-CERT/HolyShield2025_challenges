@@ -1,0 +1,41 @@
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# C/C++ build artifacts
+build/
+build-*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+
+# CCache
+.ccache/
+
+# Caches / logs / temp
+.cache/
+*.log
+*.tmp
+*.swp
+*.swo
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store

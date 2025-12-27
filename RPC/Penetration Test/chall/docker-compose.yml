@@ -1,0 +1,218 @@
+services:
+  strapi:
+    build: ./portal
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./portal/app:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      DATABASE_CLIENT: sqlite
+      DATABASE_FILENAME: ./data/data.db
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      NODE_ENV: production
+      APP_KEYS: Th1sIsAKeyForStrapi1,Th1sIsAKeyForStrapi2
+      API_TOKEN_SALT: Th1sIsAS4ltF0rAp1T0k3n
+      ADMIN_JWT_SECRET: Th1sIsAK3yF0rAdm1nJwt
+      JWT_SECRET: Th1sIsAK3yF0rJwt
+    depends_on:
+      mailhog:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/_health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+
+  frontend:
+    build: ./portal/frontend
+    ports:
+      - "3000:3000"
+    environment:
+      STRAPI_API_URL: http://strapi:1337
+    depends_on:
+      strapi:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo
+    container_name: open5gs-mongodb
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    volumes:
+      - mongodb:/data/db
+      - ./BaseStation/open5gs/docs/assets/webui/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping:1})"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  webui:
+    build:
+      context: ./BaseStation/open5gs
+      dockerfile: docker/webui/Dockerfile
+    image: ${USER}/open5gs-webui
+    container_name: open5gs-webui
+    depends_on:
+      - mongodb
+    ports:
+      - "9999:9999"
+    environment:
+      DB_URI: mongodb://mongodb/open5gs
+      WAIT_HOSTS: mongodb:27017
+    restart: unless-stopped
+
+  base:
+    build:
+      context: ./BaseStation/open5gs/docker/${DIST-ubuntu}/${TAG-latest}/base
+      args:
+        dist: ${DIST-ubuntu}
+        tag: ${TAG-latest}
+    image: ${USER}/${DIST-ubuntu}-${TAG-latest}-open5gs-base
+    command: /bin/bash -c "echo 'base' services"
+
+  build:
+    build:
+      context: ./BaseStation/open5gs
+      dockerfile: docker/build/Dockerfile
+      args:
+        dist: ${DIST-ubuntu}
+        tag: ${TAG-latest}
+        username: ${USER}
+    image: ${USER}/${DIST-ubuntu}-${TAG-latest}-open5gs-build
+    command: /bin/bash -c "echo 'build' services"
+
+  run:
+    image: ${USER}/${DIST-ubuntu}-${TAG-latest}-open5gs-build
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      webui:
+        condition: service_started
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    environment:
+      DB_URI: mongodb://localhost/open5gs
+    volumes:
+      - ./BaseStation/open5gs/runtime-config/open5gs:/usr/local/etc/open5gs
+    hostname: open5gs-run
+    command: >-
+      /bin/bash -c "
+        /root/setup.sh && \
+        for svc in nrf scp udr udm ausf pcf nssf amf smf bsf upf; do \
+          /usr/local/bin/open5gs-$${svc}d -c /usr/local/etc/open5gs/$${svc}.yaml -D; \
+        done; \
+        tail -F /usr/local/var/log/open5gs/*.log
+      "
+
+  # test:
+  #   image: ${USER}/${DIST-ubuntu}-${TAG-latest}-open5gs-build
+  #   depends_on:
+  #     - mongodb
+  #   environment:
+  #     DB_URI: mongodb://mongodb/open5gs
+  #     WAIT_HOSTS: mongodb:27017
+  #   cap_add:
+  #     - NET_ADMIN
+  #   devices:
+  #     - "/dev/net/tun:/dev/net/tun"
+  #   hostname: open5gs-test
+  #   command: /bin/bash -c "/root/setup.sh; cd /open5gs/build && /wait && meson test -v"
+
+  # dev:
+  #   build:
+  #     context: ./BaseStation/open5gs/docker/${DIST-ubuntu}/${TAG-latest}/dev
+  #     args:
+  #       dist: ${DIST-ubuntu}
+  #       tag: ${TAG-latest}
+  #       username: ${USER}
+  #   image: ${USER}/${DIST-ubuntu}-${TAG-latest}-open5gs-dev
+  #   depends_on:
+  #     - mongodb
+  #   environment:
+  #     - DB_URI=mongodb://mongodb/open5gs
+  #     - DISPLAY=${DISPLAY:-}
+  #   cap_add:
+  #     - NET_ADMIN
+  #   devices:
+  #     - "/dev/net/tun:/dev/net/tun"
+  #   volumes:
+  #     - home:/home/${USER}
+  #     - ${HOME}:/mnt
+  #   hostname: open5gs-dev
+  #   user: ${USER}
+  #   entrypoint: /bin/bash -c "/bin/bash -c \"$${@}\""
+  #   command: |
+  #     /bin/bash -c "
+  #         sudo chmod 666 /dev/net/tun
+  #         sudo /root/setup.sh
+  #         /bin/bash || exit 0
+  #     "
+
+  gnb:
+    build:
+      context: ./BaseStation/GNB
+    image: ${USER}/ueransim-gnb
+    depends_on:
+      - run
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    restart: unless-stopped
+    volumes:
+      - ./BaseStation/GNB/config:/app/config:ro
+    environment:
+      - TARGETS_CSV=127.0.0.1:4999
+
+  ue:
+    build:
+      context: ./BaseStation/UE
+    image: ${USER}/ueransim-ue
+    depends_on:
+      - gnb
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    restart: unless-stopped
+    volumes:
+      - ./BaseStation/UE/config:/app/config
+
+volumes:
+  mongodb: {}
+  home: {}

@@ -1,0 +1,22 @@
+1. nc 34.64.228.73 5001 접속
+2. 사용자별 인스턴스 구분 위해 challenge_id 입력 유도
+
+3. 혼합 기수(Mixed-Radix) + 커스텀 base-58 인코딩 복호화
+->  출력 후 {"Token": "HolyShield2025", "Key": "ringpanic"} 구해 입력
+
+4. gRPC 엔드포인트 힌트 및 ip 힌트 제공 후 바이너리 내 secret.proto 파악하여
+ grpcurl -plaintext   
+	-d '{"Token":"HolyShield2025","Key":"ringpanic","challenge_id":"(사전입력한 id)"}'   
+	-import-path ./proto   
+	-proto secret.proto   
+	34.64.228.73:5000 hidden.PanicVerifier/Flag
+
+전송 유도
+
+5. 이후 제공될 세션 및 메시지(j_k0o'g_oNnk_Gr_k3hAvUg_7w!D_0o3) 이용해 customized chacha20 복호화
+-> i_7H1nk_U'v3_DoNe_QUiTe_@_LO7_:)
+
+올바른 grpcurl 전송 3초 후 바로 강제종료 (ring overflow panic의 len == cap 조건을 바탕으로 올바른 값 입력 유도)
+
+6. 제출 이후 또 생성되는 세션과 위의 문자열을 이용해 CHAM-CTR 복호화
+->  HolyShield{i_w45_p4N1cKED_bY_dECrypti0n!!} 플래그 획득

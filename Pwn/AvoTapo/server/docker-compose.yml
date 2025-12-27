@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  chall:
+    build:
+      context: ./chall/
+      dockerfile: Dockerfile
+    container_name: chall
+    ports:
+      - "9000:9000"
+    deploy:
+      resources:
+        reservations:
+          cpus: "0.05"
+          memory: "64M"
+        limits:
+          cpus: "0.7"
+          memory: "256M"

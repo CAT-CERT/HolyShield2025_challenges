@@ -1,0 +1,8 @@
+.git
+build
+cmake-build*
+out
+*.log
+.idea
+.vscode
+__pycache__

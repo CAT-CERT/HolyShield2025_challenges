@@ -1,0 +1,85 @@
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: canon-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_config:/etc/nginx/conf.d
+    networks:
+      - ctf_net
+    depends_on:
+      - orchestrator
+    restart: unless-stopped
+    cpus: "0.25"
+    mem_limit: "128m"
+
+  worker-a:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    image: worker:latest
+    container_name: canon-worker-a
+    hostname: worker-a
+    networks:
+      - ctf_net
+    environment:
+      - REDIS_URL=redis://redis:6379
+    restart: unless-stopped
+    cpus: "0.5"
+    mem_limit: "256m"
+
+  worker-b:
+    image: worker:latest
+    container_name: canon-worker-b
+    hostname: worker-b
+    networks:
+      - ctf_net
+    depends_on:
+      - worker-a
+    environment:
+      - REDIS_URL=redis://redis:6379
+    restart: unless-stopped
+    cpus: "0.5"
+    mem_limit: "256m"
+
+
+  orchestrator:
+    build:
+      context: ./orchestrator
+      dockerfile: Dockerfile
+    container_name: canon-orchestrator
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - nginx_config:/etc/nginx/conf.d
+    networks:
+      - ctf_net
+    depends_on:
+      - worker-a
+      - worker-b
+      - redis
+    restart: unless-stopped
+    cpus: "0.5"
+    mem_limit: "256m"
+    environment:
+      - NODE_ENV=production
+      - FLAG=HolyShield{Orch3strating_the_Internal_Chains_of_D_Minor}
+
+  redis:
+    image: redis:7-alpine
+    container_name: canon-redis
+    networks:
+      - ctf_net
+    restart: unless-stopped
+    cpus: "0.25"
+    mem_limit: "128m"
+
+networks:
+  ctf_net:
+    driver: bridge
+
+volumes:
+  nginx_config:

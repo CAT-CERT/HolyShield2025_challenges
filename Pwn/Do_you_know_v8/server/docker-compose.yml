@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  v8-challenge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: v8-ctf
+    hostname: v8-ctf
+    mem_limit: 1G
+    cpus: 0.5
+    ports:
+      - "2556:8080"

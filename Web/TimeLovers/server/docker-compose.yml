@@ -1,0 +1,37 @@
+#docker-compose build --no-cache / docker-compose up
+services:
+  db:
+    deploy:
+        resources:
+          limits:
+            cpus: '0.30'
+            memory: 1G
+    build:
+      context: initdb
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - holyshield25
+      
+  app:
+    deploy:
+          resources:
+            limits:
+              cpus: '0.50'
+              memory: 1.3G
+    ports: 
+      - 9000:9000
+    build: 
+      context: web
+      dockerfile: Dockerfile
+    container_name: TimeLovers
+    restart: always
+    depends_on:
+      - db
+
+    networks:
+      - holyshield25
+
+networks:
+  holyshield25:
+    driver: bridge

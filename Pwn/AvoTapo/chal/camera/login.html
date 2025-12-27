@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-text="title">Developing...</title>
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            background: radial-gradient(circle at 20% 20%, #1b1f25 0%, #0b0d10 45%, #050607 100%);
+            font-family: "Fira Code", "Courier New", monospace;
+            color: #e5e9f0;
+        }
+
+        .terminal {
+            width: 100%;
+            max-width: 900px;
+            background: #0f1318;
+            border: 1px solid #1c232c;
+            border-radius: 12px;
+            box-shadow: 0 28px 60px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+        }
+
+        .terminal__bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(180deg, #1d252f 0%, #161c24 100%);
+            border-bottom: 1px solid #14181f;
+        }
+
+        .terminal__dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal__dot.red { background: #ff5f56; }
+        .terminal__dot.amber { background: #ffbd2e; }
+        .terminal__dot.green { background: #27c93f; }
+
+        .terminal__title {
+            margin-left: auto;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #8894a3;
+        }
+
+        .terminal__content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding: 2.5rem 2.75rem;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #9bdcfe;
+            text-shadow: 0 0 12px rgba(75, 192, 255, 0.35);
+        }
+
+        .terminal__output {
+            min-height: 320px;
+            max-height: 420px;
+            padding: 1.25rem 1.5rem;
+            border: 1px solid #1f2832;
+            border-radius: 8px;
+            background: #0b1015;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .output-line {
+            margin-bottom: 0.4rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #c0cad6;
+        }
+
+        .output-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .output-line.prompt {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .output-line.prompt .prompt-prefix {
+            flex-shrink: 0;
+        }
+
+        .output-line.prompt .command-text {
+            color: #e5e9f0;
+        }
+
+        .output-line.success { color: #82d49c; }
+        .output-line.error { color: #f66969; }
+        .output-line.info { color: #9bdcfe; }
+
+        .terminal__input-line {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .prompt-prefix {
+            color: #58d38c;
+        }
+
+        #command-input {
+            flex: 1;
+            padding: 0.75rem 0.9rem;
+            border: 1px solid #1f2832;
+            border-radius: 6px;
+            background: #131920;
+            color: #e5e9f0;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #command-input:focus {
+            outline: none;
+            border-color: #3fa8ff;
+            box-shadow: 0 0 0 2px rgba(63, 168, 255, 0.2);
+        }
+
+        .result {
+            display: none;
+            visibility: hidden;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 2.5rem 1rem;
+            }
+
+            .terminal__content {
+                padding: 2rem 1.5rem;
+            }
+
+            .terminal__output {
+                min-height: 260px;
+                max-height: 340px;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal__bar">
+            <span class="terminal__dot red"></span>
+            <span class="terminal__dot amber"></span>
+            <span class="terminal__dot green"></span>
+            <span class="terminal__title">avotapo@terminal</span>
+        </div>
+        <div class="terminal__content">
+            <h1 data-text="title">Device Management</h1>
+            <div class="terminal__output" id="terminal-output" aria-live="polite">
+                <div class="output-line info">AvoTapo shell ready. Type <strong>help</strong> for available commands.</div>
+            </div>
+            <form id="commandForm" class="terminal__input-line" autocomplete="off">
+                <span class="prompt-prefix">user@avotapo:~$</span>
+                <input type="text" id="command-input" name="command" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="Type a command" aria-label="Command input">
+            </form>
+            <div id="language-result" class="result" aria-hidden="true"></div>
+        </div>
+    </div>
+
+    <script src="func.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+CREATE DATABASE IF NOT EXISTS devilList;
+
+USE devilList;
+
+CREATE TABLE IF NOT EXISTS users (
+    idx INT AUTO_INCREMENT PRIMARY KEY,
+    id VARCHAR(50) NOT NULL UNIQUE,
+    pw VARCHAR(50) NOT NULL,
+    role VARCHAR(20) NOT NULL
+);
+
+INSERT INTO users (id, pw, role) VALUES ('admin', 'a83kd91kf0gsd93kv8s82k3l49d', 'INQUISITOR');
