@@ -1,0 +1,16 @@
+[package]
+name = "oracle"
+version = "0.1.0"
+edition = "2024"
+
+[profile.release]
+debug = false
+strip = "symbols" 
+lto = true
+
+[dependencies]
+num-bigint = "0.4"
+num-traits = "0.2"
+sha2 = "0.10"
+hex = "0.4"
+rand = "0.8"

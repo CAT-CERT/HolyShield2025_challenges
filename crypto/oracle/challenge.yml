@@ -1,0 +1,11 @@
+name: oracle
+category:
+  - crypto
+  - rev
+difficulty: medium
+cpu_spec: 1
+mem_spec: 512
+description: |
+  Is it really an oracle?
+flag: HolyShield{f1nding_sm4ll_r00ts_w1th_LLL}
+chall_dir: crypto-oracle

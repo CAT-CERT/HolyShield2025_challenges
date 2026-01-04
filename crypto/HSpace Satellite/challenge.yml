@@ -1,0 +1,7 @@
+name: HSpace Satellite
+category: crypto
+difficulty: medium
+description: |
+  just a normal ECDSA chall
+flag: HolyShield{baby_ECDSA_using_lattice_and_a_bit_of_CRT_and_bruteforcing__}
+chall_dir: crypto-baby_ECDSA
