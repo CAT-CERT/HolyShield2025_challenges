@@ -1,1 +1,1 @@
-Crypto 문제는 HSPACE 제공해주셨습니다.
+Crypto 챌린지는 HSPACE 제공해주셨습니다
